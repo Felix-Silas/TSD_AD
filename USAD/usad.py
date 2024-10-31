@@ -73,7 +73,7 @@ class UsadModel(nn.Module):
         w3 = self.decoder2(self.encoder(w1))
 
         loss1 = 1/n * torch.mean((batch - w1)**2) + (1-1/n)*torch.mean((batch - w3)**2)
-        loss2 = 1/n * torch.mean((batch - w2)**2) + (1-1/n)*torch.mean((batch - w3)**2)
+        loss2 = 1/n * torch.mean((batch - w2)**2) - (1-1/n)*torch.mean((batch - w3)**2)
 
         return {'val_loss1': loss1, 'val_loss2' : loss2}
     
@@ -86,7 +86,6 @@ class UsadModel(nn.Module):
 
         return {'val_epoch_loss1' : epoch_loss1.item(), 'val_epoch_loss2' : epoch_loss2.item()}
     
-
     def epoch_end(self, epoch, result):
         print('epoch [{}], val_epoch_loss1: {:.4f}, val_epoch_loss2: {:.4f}'.format(epoch, result['val_epoch_loss1'], result['val_epoch_loss2']))
 
@@ -150,8 +149,8 @@ def testing_scores(model, test_loader, alpha = .5, beta = .5):
 
     return results
 
-def testing_threshold(model, test_loader, aplha = .5, beta = .5, contamination = 0.1): # 상위 10%의 점수를 이상치로 하겠다
-    results = testing_scores(model, test_loader, aplha = .5, beta = .5)
-    score_pred = np.concatenate([torch.stack(results[:-1]).flatten().deatch().numpy(),
+def testing_threshold(model, test_loader, alpha = .5, beta = .5, contamination = 0.1): # 상위 10%의 점수를 이상치로 하겠다
+    results = testing_scores(model, test_loader, alpha = .5, beta = .5)
+    score_pred = np.concatenate([torch.stack(results[:-1]).flatten().detach().numpy(),
                                  results[-1].flatten().detach().numpy()])
-    return np.sort(score_pred)[int(len(score_pred)) * (1- contamination)]
+    return np.sort(score_pred)[int(len(score_pred) * (1- contamination))]
