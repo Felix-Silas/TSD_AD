@@ -98,13 +98,13 @@ def training(epochs, model, train_loader, val_loader, optimizer = torch.optim.Ad
             loss1, loss2 = model.training_step(batch, epoch + 1)
             loss1.backward()
             optimizer1.step()
-            optimizer1.zero_grad()
+            optimizer1.zero_grad() # 누적되기 떄문에 이전 gradient 초기화
 
             # Train AE2
             loss1, loss2 = model.training_step(batch, epoch + 1)
             loss2.backward()
             optimizer2.step()
-            optimizer2.zero_grad()
+            optimizer2.zero_grad() 
 
         result = evaluate(model, val_loader, epoch + 1)
         model.print_loss(epoch, result)
