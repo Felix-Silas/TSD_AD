@@ -216,7 +216,7 @@ def train(n_epochs=2000):
 
 
 if __name__ == "__main__":
-    dataset = pd.read_csv('exchange-2_cpc_results.csv')
+    dataset = pd.read_csv('data/exchange-2_cpc_results.csv')
 
     # data split
     train_len = int(0.7 * dataset.shape[0])
