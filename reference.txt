@@ -1,0 +1,12 @@
+MAD-GAN (ICANN 2019)
+Code = https://github.com/Guillem96/madgan-pytorch
+Paper = https://arxiv.org/abs/1901.04997
+
+USAD (KDD 2020)
+Code = https://github.com/manigalati/usad
+Paper = https://dl.acm.org/doi/abs/10.1145/3394486.3403392
+ 
+
+TadGAN (IEEE 2020)
+Code = https://github.com/arunppsg/TadGAN
+Paper = https://ieeexplore.ieee.org/abstract/document/9378139/
