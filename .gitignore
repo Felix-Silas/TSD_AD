@@ -1,4 +1,5 @@
-input
 document
 __pycache__
 *.csv
+Dataset
+data

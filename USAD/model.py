@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-
+import torch.nn.init as init
 from utils import *
+from sklearn.manifold import TSNE
 
 device = get_default_device()
 
@@ -12,7 +13,12 @@ class Encoder(nn.Module):
     self.linear2 = nn.Linear(int(in_size/2), int(in_size/4))
     self.linear3 = nn.Linear(int(in_size/4), latent_size)
     self.relu = nn.ReLU(True) # inplace = True
-        
+    
+    # 가중치 초기화
+    init.kaiming_normal_(self.linear1.weight, nonlinearity='relu')
+    init.kaiming_normal_(self.linear2.weight, nonlinearity='relu')
+    init.kaiming_normal_(self.linear3.weight, nonlinearity='relu')
+    
   def forward(self, w):
     out = self.linear1(w)
     out = self.relu(out)
@@ -30,6 +36,11 @@ class Decoder(nn.Module):
         self.linear3 = nn.Linear(int(out_size/2), out_size)
         self.relu = nn.ReLU(True)
         self.sigmoid = nn.Sigmoid()
+
+        # 가중치 초기화
+        init.kaiming_normal_(self.linear1.weight, nonlinearity='relu')
+        init.kaiming_normal_(self.linear2.weight, nonlinearity='relu')
+        init.kaiming_normal_(self.linear3.weight, nonlinearity='relu')
     
     def forward(self, z):
         out = self.linear1(z)
@@ -64,11 +75,13 @@ class USAD_model(nn.Module):
             z = self.encoder(batch)
             w1 = self.decoder1(z)
             w2 = self.decoder2(z)
+
             w3 = self.decoder2(self.encoder(w1))
             #loss1 = 1/n * torch.mean((batch - w1)**2) + (1-1/n) * torch.mean((batch - w3)**2)
             #loss2 = 1/n * torch.mean((batch - w2)**2) - (1-1/n) * torch.mean((batch - w3)**2)
             loss1 = 1/n*torch.mean((batch-w1)**2)+(1-1/n)*torch.mean((batch-w3)**2)
             loss2 = 1/n*torch.mean((batch-w2)**2)-(1-1/n)*torch.mean((batch-w3)**2)
+            
         return {'val_loss1': loss1, 'val_loss2': loss2}
     
     def cal_epoch_loss(self, outputs):
@@ -79,7 +92,7 @@ class USAD_model(nn.Module):
         return {'val_loss1': epoch_loss1.item(), 'val_loss2': epoch_loss2.item()}
     
     def print_loss(self, epoch, result):
-        print('Epoch [{}], val_loss1: {:.4f}, val_loss2: {:.4f}'.format(epoch, result['val_loss1'], result['val_loss2']))
+        print('Epoch [{}], val_loss1: {:.4f}, val_loss2: {:.4f}'.format(epoch + 1, result['val_loss1'], result['val_loss2']))
 
 def evaluate(model, val_loader, n):
     outputs = [model.validation_step(to_device(batch,device), n) for [batch] in val_loader]
